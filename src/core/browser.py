@@ -1,7 +1,7 @@
 """
-浏览器自动化控制模块
+ブラウザ自動化制御モジュール
 
-基于 Selenium 实现浏览器控制功能
+Seleniumベースのブラウザ制御機能
 """
 
 import time
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class BrowserController:
-    """浏览器控制器"""
+    """ブラウザコントローラー"""
 
     def __init__(self,
                  browser_type: str = 'chrome',
@@ -33,13 +33,13 @@ class BrowserController:
                  user_agent: Optional[str] = None,
                  window_size: Tuple[int, int] = (1920, 1080)):
         """
-        初始化浏览器控制器
+        ブラウザコントローラーの初期化
 
         Args:
-            browser_type: 浏览器类型 'chrome' | 'firefox' | 'edge'
-            headless: 是否无头模式（不显示浏览器窗口）
-            user_agent: 自定义 User-Agent
-            window_size: 窗口大小 (width, height)
+            browser_type: ブラウザタイプ 'chrome' | 'firefox' | 'edge'
+            headless: ヘッドレスモードにするか（ブラウザウィンドウをリストデモしない）
+            user_agent: カスタム User-Agent
+            window_size: ウィンドウサイズ (width, height)
         """
         self.browser_type = browser_type.lower()
         self.headless = headless
@@ -47,11 +47,11 @@ class BrowserController:
         self.window_size = window_size
         self.driver = None
 
-        logger.info(f"初始化浏览器控制器: {browser_type}")
+        logger.info(f"ブラウザコントローラーの初期化: {browser_type}")
         self._init_driver()
 
     def _init_driver(self):
-        """初始化 WebDriver"""
+        """初期化 WebDriver"""
         try:
             if self.browser_type == 'chrome':
                 self._init_chrome()
@@ -60,26 +60,26 @@ class BrowserController:
             elif self.browser_type == 'edge':
                 self._init_edge()
             else:
-                raise ValueError(f"不支持的浏览器类型: {self.browser_type}")
+                raise ValueError(f"非サポートブラウザタイプ: {self.browser_type}")
 
-            # 设置窗口大小
+            # 設定ウィンドウサイズ
             if not self.headless:
                 self.driver.set_window_size(*self.window_size)
 
-            logger.info(f"浏览器初始化成功: {self.browser_type}")
+            logger.info(f"ブラウザ初期化成功: {self.browser_type}")
 
         except Exception as e:
-            logger.error(f"浏览器初始化失败: {e}")
+            logger.error(f"ブラウザ初期化失敗: {e}")
             raise
 
     def _init_chrome(self):
-        """初始化 Chrome 浏览器"""
+        """初期化 Chrome ブラウザ"""
         options = ChromeOptions()
 
         if self.headless:
             options.add_argument('--headless')
 
-        # 常用配置
+        # 一般的な使用設定
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--disable-gpu')
@@ -88,14 +88,14 @@ class BrowserController:
         if self.user_agent:
             options.add_argument(f'user-agent={self.user_agent}')
 
-        # 禁用自动化标识
+        # 自動化識別子を禁止
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
 
         self.driver = webdriver.Chrome(options=options)
 
     def _init_firefox(self):
-        """初始化 Firefox 浏览器"""
+        """初期化 Firefox ブラウザ"""
         options = FirefoxOptions()
 
         if self.headless:
@@ -107,7 +107,7 @@ class BrowserController:
         self.driver = webdriver.Firefox(options=options)
 
     def _init_edge(self):
-        """初始化 Edge 浏览器"""
+        """初期化 Edge ブラウザ"""
         options = ChromeOptions()
 
         if self.headless:
@@ -124,34 +124,34 @@ class BrowserController:
 
     def open(self, url: str) -> bool:
         """
-        打开网址
+        URLを開く
 
         Args:
-            url: 目标网址
+            url: 対象URL
 
         Returns:
-            bool: 是否成功
+            bool: 成功したか
         """
         try:
             self.driver.get(url)
-            logger.info(f"已打开: {url}")
+            logger.info(f"開きました: {url}")
             return True
         except Exception as e:
-            logger.error(f"打开网址失败: {e}")
+            logger.error(f"URLを開く失敗: {e}")
             return False
 
     def find_element(self,
                      locator: Tuple[str, str],
                      timeout: int = 10) -> Optional[Any]:
         """
-        查找单个元素
+        単一要素を検索
 
         Args:
-            locator: 定位器 (By.ID, 'element_id') 或 (By.XPATH, '//xpath')
-            timeout: 超时时间（秒）
+            locator: ロケーター (By.ID, 'element_id') または (By.XPATH, '//xpath')
+            timeout: タイムアウト時間（秒）
 
         Returns:
-            WebElement 或 None
+            WebElement または None
         """
         try:
             element = WebDriverWait(self.driver, timeout).until(
@@ -159,24 +159,24 @@ class BrowserController:
             )
             return element
         except TimeoutException:
-            logger.warning(f"元素查找超时: {locator}")
+            logger.warning(f"要素検索タイムアウト: {locator}")
             return None
         except Exception as e:
-            logger.error(f"查找元素失败: {e}")
+            logger.error(f"要素の検索に失敗: {e}")
             return None
 
     def find_elements(self,
                       locator: Tuple[str, str],
                       timeout: int = 10) -> List[Any]:
         """
-        查找多个元素
+        複関数関数要素なを検索
 
         Args:
-            locator: 定位器
-            timeout: 超时时间（秒）
+            locator: ロケーター
+            timeout: タイムアウト時間（秒）
 
         Returns:
-            元素列表
+            要素リスト
         """
         try:
             elements = WebDriverWait(self.driver, timeout).until(
@@ -184,34 +184,34 @@ class BrowserController:
             )
             return elements
         except TimeoutException:
-            logger.warning(f"未找到元素: {locator}")
+            logger.warning(f"要素が見つかつかりません: {locator}")
             return []
         except Exception as e:
-            logger.error(f"查找元素失败: {e}")
+            logger.error(f"要素の検索に失敗: {e}")
             return []
 
     def click(self,
               locator: Tuple[str, str],
               timeout: int = 10) -> bool:
         """
-        点击元素
+        要素をクリック
 
         Args:
-            locator: 元素定位器
-            timeout: 超时时间
+            locator: 要素ロケーター
+            timeout: タイムアウト時間
 
         Returns:
-            bool: 是否成功
+            bool: 成功したか
         """
         try:
             element = self.find_element(locator, timeout)
             if element:
                 element.click()
-                logger.debug(f"已点击元素: {locator}")
+                logger.debug(f"すでに要素をクリック: {locator}")
                 return True
             return False
         except Exception as e:
-            logger.error(f"点击失败: {e}")
+            logger.error(f"クリックに失敗: {e}")
             return False
 
     def input_text(self,
@@ -220,16 +220,16 @@ class BrowserController:
                    clear_first: bool = True,
                    timeout: int = 10) -> bool:
         """
-        输入文本
+        テキストを入力
 
         Args:
-            locator: 元素定位器
-            text: 输入的文本
-            clear_first: 是否先清空
-            timeout: 超时时间
+            locator: 要素ロケーター
+            text: 入力テキスト
+            clear_first: 最初にクリアするか
+            timeout: タイムアウト時間
 
         Returns:
-            bool: 是否成功
+            bool: 成功したか
         """
         try:
             element = self.find_element(locator, timeout)
@@ -237,25 +237,25 @@ class BrowserController:
                 if clear_first:
                     element.clear()
                 element.send_keys(text)
-                logger.debug(f"已输入文本到: {locator}")
+                logger.debug(f"すでにテキストを入力へ: {locator}")
                 return True
             return False
         except Exception as e:
-            logger.error(f"输入文本失败: {e}")
+            logger.error(f"テキストを入力失敗: {e}")
             return False
 
     def get_text(self,
                  locator: Tuple[str, str],
                  timeout: int = 10) -> Optional[str]:
         """
-        获取元素文本
+        要素のテキストを取得
 
         Args:
-            locator: 元素定位器
-            timeout: 超时时间
+            locator: 要素ロケーター
+            timeout: タイムアウト時間
 
         Returns:
-            文本内容或 None
+            テキストコンテンツまたは None
         """
         try:
             element = self.find_element(locator, timeout)
@@ -263,7 +263,7 @@ class BrowserController:
                 return element.text
             return None
         except Exception as e:
-            logger.error(f"获取文本失败: {e}")
+            logger.error(f"取得テキスト失敗: {e}")
             return None
 
     def get_attribute(self,
@@ -271,15 +271,15 @@ class BrowserController:
                       attribute: str,
                       timeout: int = 10) -> Optional[str]:
         """
-        获取元素属性
+        要素の属性特徴性特徴性を取得
 
         Args:
-            locator: 元素定位器
-            attribute: 属性名
-            timeout: 超时时间
+            locator: 要素ロケーター
+            attribute: 属性特徴性特徴性名前
+            timeout: タイムアウト時間
 
         Returns:
-            属性值或 None
+            属性特徴性特徴性値または None
         """
         try:
             element = self.find_element(locator, timeout)
@@ -287,146 +287,146 @@ class BrowserController:
                 return element.get_attribute(attribute)
             return None
         except Exception as e:
-            logger.error(f"获取属性失败: {e}")
+            logger.error(f"属性特徴性特徴性の取得に失敗: {e}")
             return None
 
     def wait_for_element(self,
                          locator: Tuple[str, str],
                          timeout: int = 10) -> bool:
         """
-        等待元素出现
+        要素がエクスポート現在するのを待機
 
         Args:
-            locator: 元素定位器
-            timeout: 超时时间
+            locator: 要素ロケーター
+            timeout: タイムアウト時間
 
         Returns:
-            bool: 是否找到
+            bool: 見つかつかったか
         """
         element = self.find_element(locator, timeout)
         return element is not None
 
     def execute_script(self, script: str, *args) -> Any:
         """
-        执行 JavaScript
+        JavaScriptを実シリアル
 
         Args:
-            script: JavaScript 代码
-            *args: 传递给 JavaScript 的参数
+            script: JavaScript コード
+            *args: アップロード递给 JavaScript パラメータ
 
         Returns:
-            执行结果
+            実シリアル結結果
         """
         try:
             result = self.driver.execute_script(script, *args)
-            logger.debug(f"已执行 JavaScript")
+            logger.debug(f"すでにJavaScriptを実シリアル")
             return result
         except Exception as e:
-            logger.error(f"执行 JavaScript 失败: {e}")
+            logger.error(f"JavaScriptを実シリアル 失敗: {e}")
             return None
 
     def scroll_to_element(self, locator: Tuple[str, str], timeout: int = 10) -> bool:
         """
-        滚动到元素位置
+        要素の位置設定までスクロール
 
         Args:
-            locator: 元素定位器
-            timeout: 超时时间
+            locator: 要素ロケーター
+            timeout: タイムアウト時間
 
         Returns:
-            bool: 是否成功
+            bool: 成功したか
         """
         try:
             element = self.find_element(locator, timeout)
             if element:
                 self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
-                time.sleep(0.5)  # 等待滚动完成
-                logger.debug(f"已滚动到元素: {locator}")
+                time.sleep(0.5)  # 待機スクロール完了した
+                logger.debug(f"すでにスクロールして要素: {locator}")
                 return True
             return False
         except Exception as e:
-            logger.error(f"滚动到元素失败: {e}")
+            logger.error(f"要素へのスクロールに失敗: {e}")
             return False
 
     def scroll_page(self, amount: int = 500):
         """
-        滚动页面
+        ページをスクロール
 
         Args:
-            amount: 滚动像素量（正数向下，负数向上）
+            amount: スクロールピクセル数量（正数は下向き，負数は上向き）
         """
         self.driver.execute_script(f"window.scrollBy(0, {amount});")
-        logger.debug(f"页面滚动: {amount}px")
+        logger.debug(f"ページスクロール: {amount}px")
 
     def screenshot(self, filename: Optional[str] = None,
                   folder: str = "images/screenshots") -> Optional[str]:
         """
-        截取当前页面可见区域
+        現在にのページリストデモ領領域をキャプチャ
 
         Args:
-            filename: 文件名，None自动生成
-            folder: 保存文件夹
+            filename: ファイル名，None自動生成
+            folder: 保存したファイルフォルダ
 
         Returns:
-            保存的文件路径或 None
+            保存存されたファイルパスまたは None
         """
         try:
-            # 创建文件夹
+            # 作成成ファイルフォルダ
             save_folder = Path(folder)
             save_folder.mkdir(parents=True, exist_ok=True)
 
-            # 生成文件名
+            # 生成ファイル名
             if filename is None:
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
                 filename = f"screenshot_{timestamp}.png"
 
             filepath = save_folder / filename
 
-            # 截图
+            # スクリーンショット
             self.driver.save_screenshot(str(filepath))
 
-            logger.info(f"截图已保存: {filepath}")
+            logger.info(f"スクリーンショットすでに保存存: {filepath}")
             return str(filepath)
 
         except Exception as e:
-            logger.error(f"截图失败: {e}")
+            logger.error(f"スクリーンショット失敗: {e}")
             return None
 
     def screenshot_full_page(self, filename: Optional[str] = None,
                             folder: str = "images/screenshots") -> Optional[str]:
         """
-        截取整个网页（包括需要滚动的部分）
+        キャプチャウェブページ全ボディ（含む必要スクロール一外部）
 
         Args:
-            filename: 文件名
-            folder: 保存文件夹
+            filename: ファイル名
+            folder: 保存したファイルフォルダ
 
         Returns:
-            保存的文件路径或 None
+            保存存されたファイルパスまたは None
         """
         try:
-            # 创建文件夹
+            # 作成成ファイルフォルダ
             save_folder = Path(folder)
             save_folder.mkdir(parents=True, exist_ok=True)
 
-            # 生成文件名
+            # 生成ファイル名
             if filename is None:
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
                 filename = f"full_page_{timestamp}.png"
 
             filepath = save_folder / filename
 
-            # 获取页面总高度
+            # 取得ページ总高さささ
             total_height = self.driver.execute_script(
                 "return document.body.scrollHeight"
             )
 
-            # 获取窗口高度
+            # ウィンドウ高ささを取得さ
             window_height = self.driver.execute_script(
                 "return window.innerHeight"
             )
 
-            # 使用 PIL 拼接完整截图
+            # 使用 PIL 完全に結合スクリーンショット
             from PIL import Image
             import io
 
@@ -434,17 +434,17 @@ class BrowserController:
             current_position = 0
 
             while current_position < total_height:
-                # 截取当前可见区域
+                # キャプチャ現在リストデモされている領領域
                 screenshot_binary = self.driver.get_screenshot_as_png()
                 screenshot = Image.open(io.BytesIO(screenshot_binary))
                 screenshots.append(screenshot)
 
-                # 滚动到下一部分
-                current_position += window_height - 50  # 重叠50px避免缺失
+                # スクロールして回の部分
+                current_position += window_height - 50  # 重複50px欠落を回避
                 self.driver.execute_script(f"window.scrollTo(0, {current_position});")
-                time.sleep(0.3)  # 等待滚动完成
+                time.sleep(0.3)  # 待機スクロール完了した
 
-            # 拼接图片
+            # 画画像画像画像を結合
             if screenshots:
                 total_width = screenshots[0].width
                 total_image_height = sum(img.height for img in screenshots)
@@ -457,63 +457,63 @@ class BrowserController:
                     y_offset += screenshot.height
 
                 final_image.save(str(filepath))
-                logger.info(f"全页截图已保存: {filepath}")
+                logger.info(f"全ページスクリーンショットすでに保存存: {filepath}")
                 return str(filepath)
 
             return None
 
         except Exception as e:
-            logger.error(f"全页截图失败: {e}")
+            logger.error(f"全ページスクリーンショット失敗: {e}")
             return None
 
     def get_url(self) -> str:
-        """获取当前 URL"""
+        """現在にのURLを取得"""
         return self.driver.current_url
 
     def get_title(self) -> str:
-        """获取页面标题"""
+        """ページタイトルを取得"""
         return self.driver.title
 
     def back(self):
-        """后退"""
+        """戻る"""
         self.driver.back()
-        logger.debug("页面后退")
+        logger.debug("ページ戻る")
 
     def forward(self):
-        """前进"""
+        """前インポート"""
         self.driver.forward()
-        logger.debug("页面前进")
+        logger.debug("進む")
 
     def refresh(self):
-        """刷新页面"""
+        """変更新ページ"""
         self.driver.refresh()
-        logger.debug("页面刷新")
+        logger.debug("ページ変更新")
 
     def close(self):
-        """关闭浏览器"""
+        """ブラウザを閉じる"""
         if self.driver:
             self.driver.quit()
             self.driver = None
-            logger.info("浏览器已关闭")
+            logger.info("ブラウザを閉じました")
 
     def __enter__(self):
-        """上下文管理器入口"""
+        """コンテキストマネージャー入りインターフェース"""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """上下文管理器退出"""
+        """コンテキストマネージャー終了した"""
         self.close()
 
     def __del__(self):
-        """析构函数，确保关闭浏览器"""
-        # 注释掉自动关闭，让浏览器保持打开
+        """デストラクタ，正しい保存ブラウザを閉じる"""
+        # 自動クローズをコメントアウト，、ブラウザを開いたままにする
         # self.close()
         pass
 
 
-# 便捷的定位器常量
+# 便利用ロケーターによって常数量
 class Locator:
-    """元素定位器常量"""
+    """要素ロケーターによって常数量"""
     ID = By.ID
     NAME = By.NAME
     CLASS_NAME = By.CLASS_NAME
@@ -524,44 +524,44 @@ class Locator:
     XPATH = By.XPATH
 
 
-# 测试函数
+# テスト関関数
 if __name__ == "__main__":
-    # 配置日志
+    # ログ設定
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
 
-    print("浏览器控制器测试")
+    print("ブラウザ制御器テスト")
     print("=" * 60)
 
-    # 使用上下文管理器自动关闭浏览器
+    # 使用コンテキストマネージャーを使用して自動ブラウザを閉じる
     with BrowserController(browser_type='chrome', headless=False) as browser:
-        # 打开网页
-        print("\n1. 打开百度...")
+        # ウェブページを開く
+        print("\n1. 開くBaidu...")
         browser.open('https://www.baidu.com')
 
-        # 查找搜索框
-        print("2. 查找搜索框...")
+        # 検索検索ボックス
+        print("2. 検索検索ボックス...")
         search_box = browser.find_element((Locator.ID, 'kw'))
         if search_box:
-            print("   [OK] 找到搜索框")
+            print("   [OK] 見つかつけるへ検索ボックス")
 
-            # 输入文本
-            print("3. 输入搜索内容...")
+            # テキストを入力
+            print("3. 検索を入力コンテンツ...")
             browser.input_text((Locator.ID, 'kw'), 'Python Selenium')
 
-            # 点击搜索按钮
-            print("4. 点击搜索...")
+            # クリック検索ボタン
+            print("4. クリック検索...")
             browser.click((Locator.ID, 'su'))
 
-            # 等待结果加载
+            # 結結果を待って読み込みみみみ込みみみ
             time.sleep(2)
 
-            # 截图
-            print("5. 截图...")
+            # スクリーンショット
+            print("5. スクリーンショット...")
             browser.screenshot('baidu_search_result.png')
 
-            print("\n[OK] 测试完成")
+            print("\n[OK] テスト完了した")
         else:
-            print("   [X] 未找到搜索框")
+            print("   [X] 未見つかつけるへ検索ボックス")

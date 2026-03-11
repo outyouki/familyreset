@@ -1,110 +1,105 @@
 # FamilyReset
 
-自动化操作工具 - 基于 Selenium 的浏览器自动化和图像识别
+自動化操作ツール - Seleniumベースのブラウザ自動化と画像認識
 
-## 项目结构
+## プロジェクト構造
 
 ```
 FamilyReset/
-├── 58_bot_v2.py          # 58同城自动化脚本（主程序）
-├── requirements.txt       # 项目依赖
-├── README.md             # 项目说明
+├── requirements.txt       # プロジェクトの依存関係
+├── README.md             # プロジェクトの説明
 ├── src/
 │   └── core/
 │       ├── __init__.py
-│       ├── browser.py     # 浏览器控制模块
-│       ├── recognizer.py  # 图像识别模块
-│       └── controller.py  # 鼠标键盘控制模块
+│       ├── browser.py     # ブラウザ制御モジュール
+│       ├── recognizer.py  # 画像認識モジュール
+│       └── controller.py  # マウスキーボード制御モジュール
 └── images/
     └── 58/
-        ├── templates/    # 模板图片存放目录
-        └── screenshots/  # 截图保存目录
+        ├── templates/    # テンプレート画像保存ディレクトリ
+        └── screenshots/  # スクリーンショット保存ディレクトリ
 ```
 
-## 安装依赖
+## 依存関係のインストール
 
-1. 创建虚拟环境（推荐）：
+1. 仮想環境の作成（推奨）：
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # macOS/Linux
-# 或 venv\Scripts\activate  # Windows
+# または venv\Scripts\activate  # Windows
 ```
 
-2. 安装依赖：
+2. 依存関係のインストール：
 ```bash
 pip install -r requirements.txt
 ```
 
-## 核心模块说明
+## コアモジュールの説明
 
 ### 1. BrowserController (browser.py)
-基于 Selenium 的浏览器控制器，支持：
-- Chrome、Firefox、Edge 浏览器
-- 元素查找和交互
-- 页面截图
-- JavaScript 执行
+Seleniumベースのブラウザコントローラー、以下をサポート：
+- Chrome、Firefox、Edgeブラウザ
+- 要素の検索と操作
+- ページのスクリーンショット
+- JavaScriptの実行
 
 ### 2. ImageRecognizer (recognizer.py)
-基于 OpenCV 的图像识别模块，支持：
-- 模板匹配
-- 特征匹配
-- 多模板同时查找
+OpenCVベースの画像認識モジュール、以下をサポート：
+- テンプレートマッチング
+- 特徴量マッチング
+- 複数テンプレートの同時検索
 
 ### 3. MouseController (controller.py)
-基于 pyautogui 的鼠标键盘控制，支持：
-- 鼠标移动和点击
-- 键盘输入
-- 热键监听
+pyautoguiベースのマウスキーボード制御、以下をサポート：
+- マウスの移動とクリック
+- キーボード入力
+- ホットキー監視
 
 ## 使用方法
 
-编辑 `58_bot_v2.py` 中的 `OPERATIONS` 列表来定义操作流程：
+`58_bot_v2.py` の `OPERATIONS` リストを編集して操作フローを定義します：
 
 ```python
 OPERATIONS = [
-    # 打开网址
+    # URLを開く
     {'type': 'open_url', 'url': 'https://example.com'},
 
-    # 等待
+    # 待機
     {'type': 'wait', 'seconds': 2},
 
-    # 点击文本
-    {'type': 'click_text', 'text': '按钮文字'},
+    # テキストをクリック
+    {'type': 'click_text', 'text': 'ボタン文字'},
 
-    # 使用XPath点击
+    # XPathでクリック
     {'type': 'click_xpath', 'xpath': '//button[@class="btn"]'},
 
-    # 跨页点击所有元素
+    # ページをまたいで全要素をクリック
     {'type': 'click_xpath_all_pages',
      'xpath': '//ul/li',
-     'next_page_text': '下一页'},
+     'next_page_text': '次のページ'},
 ]
 ```
 
-运行脚本：
-```bash
-python 58_bot_v2.py
-```
 
-## 操作类型说明
+## 操作タイプの説明
 
-| 类型 | 说明 | 参数 |
+| タイプ | 説明 | パラメータ |
 |------|------|------|
-| `open_url` | 打开网址 | `url` |
-| `wait` | 等待 | `seconds` |
-| `click_text` | 点击包含文本的元素 | `text`, `exact_match` |
-| `click_xpath` | XPath点击 | `xpath`, `index` |
-| `click_xpath_all` | XPath点击所有 | `xpath`, `wait_after_each` |
-| `click_xpath_all_pages` | 跨页点击所有 | `xpath`, `next_page_text`, `max_pages` |
-| `click_image` | 图像识别点击 | `template` |
-| `switch_tab` | 切换标签页 | - |
-| `screenshot` | 保存截图 | `filename` |
+| `open_url` | URLを開く | `url` |
+| `wait` | 待機 | `seconds` |
+| `click_text` | テキストを含む要素をクリック | `text`, `exact_match` |
+| `click_xpath` | XPathでクリック | `xpath`, `index` |
+| `click_xpath_all` | XPathで全てクリック | `xpath`, `wait_after_each` |
+| `click_xpath_all_pages` | ページをまたいで全てクリック | `xpath`, `next_page_text`, `max_pages` |
+| `click_image` | 画像認識でクリック | `template` |
+| `switch_tab` | タブを切り替え | - |
+| `screenshot` | スクリーンショットを保存 | `filename` |
 
-## 注意事项
+## 注意事項
 
-1. 需要安装 Chrome 浏览器（或 Firefox/Edge）
-2. 首次运行会自动下载对应的 WebDriver
-3. 图像识别需要将模板图片放到 `images/58/templates/` 目录
+1. Chromeブラウザ（またはFirefox/Edge）のインストールが必要
+2. 初回実行時に対応するWebDriverが自動ダウンロードされます
+3. 画像認識にはテンプレート画像を `images/58/templates/` ディレクトリに配置する必要があります
 
 ## License
 
