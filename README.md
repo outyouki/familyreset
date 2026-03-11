@@ -1,23 +1,25 @@
 # FamilyReset
 
-自動化操作ツール - Seleniumベースのブラウザ自動化と画像認識
+ファミリー設定をデフォルトに戻すための自動化ツール - Seleniumベースのブラウザ自動化
 
 ## プロジェクト構造
 
 ```
 FamilyReset/
-├── requirements.txt       # プロジェクトの依存関係
-├── README.md             # プロジェクトの説明
+├── config.py             # 設定ファイル（ログイン情報・各種パラメータ）
+├── familyreset.py        # メインプログラム
+├── familyreset_ja.py     # 日本語版メインプログラム
+├── requirements.txt      # プロジェクトの依存関係
+├── README.md            # プロジェクトの説明
 ├── src/
+│   ├── __init__.py
 │   └── core/
 │       ├── __init__.py
-│       ├── browser.py     # ブラウザ制御モジュール
-│       ├── recognizer.py  # 画像認識モジュール
-│       └── controller.py  # マウスキーボード制御モジュール
+│       ├── browser.py    # ブラウザ制御モジュール
+│       ├── recognizer.py # 画像認識モジュール
+│       └── controller.py # マウスキーボード制御モジュール
 └── images/
-    └── 58/
-        ├── templates/    # テンプレート画像保存ディレクトリ
-        └── screenshots/  # スクリーンショット保存ディレクトリ
+    └── screenshots/      # スクリーンショット保存ディレクトリ
 ```
 
 ## 依存関係のインストール
@@ -33,6 +35,71 @@ source venv/bin/activate  # macOS/Linux
 ```bash
 pip install -r requirements.txt
 ```
+
+## 設定ファイル (config.py)
+
+`config.py` はファミリー設定をリセットするための全ての設定を管理します。
+
+### 基本設定
+
+| 設定項目 | 説明 | デフォルト値 |
+|---------|------|------------|
+| `browser_type` | 使用するブラウザ | `'chrome'` |
+| `headless` | ヘッドレスモード（ブラウザ非表示） | `False` |
+| `target_url` | ログインページのURL | `'#{ログインURL}'` |
+
+### ログイン情報
+
+| 設定項目 | 説明 |
+|---------|------|
+| `login_email_label` | メールアドレス入力フィールドのラベル |
+| `login_email` | ログイン用メールアドレス |
+| `login_password_label` | パスワード入力フィールドのラベル |
+| `login_password` | ログイン用パスワード |
+
+### URL保存キー
+
+| 設定項目 | 説明 |
+|---------|------|
+| `url_save_key` | URLを保存・復元するための識別キー（ニックネームなど） |
+
+### アプリ制限設定の削除
+
+| 設定項目 | 説明 |
+|---------|------|
+| `delete_target_xpath` | 削除対象要素のXPath |
+| `delete_button_text` | 削除ボタンのテキスト |
+| `confirm_button_text` | 削除確認ボタンのテキスト |
+| `max_delete_iterations` | 最大削除回数 |
+
+### ジオフェンス設定
+
+| 設定項目 | 説明 |
+|---------|------|
+| `container_xpath` | ジオフェンス一覧のコンテナXPath |
+| `container_delete_button_text` | コンテナ内の削除ボタンテキスト |
+| `container_confirm_button_text` | 削除確認ダイアログのボタンテキスト |
+| `container_confirm_button_xpath` | 削除確認ダイアログのボタンXPath |
+| `max_container_delete_iterations` | 最大削除回数 |
+
+### 端末ロック設定
+
+| 設定項目 | 説明 |
+|---------|------|
+| `container_xpath1` | ロック一覧のコンテナXPath |
+| `container_delete_button_text1` | コンテナ内の削除ボタンテキスト |
+| `container_confirm_button_text1` | 削除確認ダイアログのボタンテキスト |
+| `container_confirm_button_xpath1` | 削除確認ダイアログのボタンXPath |
+| `max_container_delete_iterations1` | 最大削除回数 |
+
+### 使用例
+
+```python
+# config.py の設定を変更して実行
+python config.py
+```
+
+設定を変更する場合は、`config.py` の `CONFIG` ディクショナリの値を編集してください。
 
 ## コアモジュールの説明
 
@@ -57,49 +124,44 @@ pyautoguiベースのマウスキーボード制御、以下をサポート：
 
 ## 使用方法
 
-`58_bot_v2.py` の `OPERATIONS` リストを編集して操作フローを定義します：
+### 基本的な実行
 
-```python
-OPERATIONS = [
-    # URLを開く
-    {'type': 'open_url', 'url': 'https://example.com'},
-
-    # 待機
-    {'type': 'wait', 'seconds': 2},
-
-    # テキストをクリック
-    {'type': 'click_text', 'text': 'ボタン文字'},
-
-    # XPathでクリック
-    {'type': 'click_xpath', 'xpath': '//button[@class="btn"]'},
-
-    # ページをまたいで全要素をクリック
-    {'type': 'click_xpath_all_pages',
-     'xpath': '//ul/li',
-     'next_page_text': '次のページ'},
-]
+```bash
+# 設定ファイルを実行
+python config.py
 ```
 
+### カスタマイズ
 
-## 操作タイプの説明
+1. `config.py` を開き、`CONFIG` ディクショナリの値を変更します
+2. 主に変更する設定：
+   - **ログイン情報**: `login_email`, `login_password`
+   - **ニックネーム**: `url_save_key`
+   - **ブラウザ設定**: `browser_type`, `headless`
+3. 設定変更後、`python config.py` を実行します
 
-| タイプ | 説明 | パラメータ |
-|------|------|------|
-| `open_url` | URLを開く | `url` |
-| `wait` | 待機 | `seconds` |
-| `click_text` | テキストを含む要素をクリック | `text`, `exact_match` |
-| `click_xpath` | XPathでクリック | `xpath`, `index` |
-| `click_xpath_all` | XPathで全てクリック | `xpath`, `wait_after_each` |
-| `click_xpath_all_pages` | ページをまたいで全てクリック | `xpath`, `next_page_text`, `max_pages` |
-| `click_image` | 画像認識でクリック | `template` |
-| `switch_tab` | タブを切り替え | - |
-| `screenshot` | スクリーンショットを保存 | `filename` |
+## 自動化される操作
+
+`task_login_and_delete()` 関数は以下の操作を自動的に実行します：
+
+1. **ログイン** - ファミリー管理サイトにログイン
+2. **ホームページ** - アプリの制限を有効化
+3. **アプリ制限** - 全設定を一括削除
+4. **ジオフェンス設定** - 全項目を削除
+5. **通知設定** - Oneファミリー通知・メール通知の設定
+6. **端末ロック** - 全ロック設定を削除
+7. **TONEカメラ** - カメラ設定を構成
+8. **GPS** - 位置情報記録を有効化
+9. **ブラウザアプリ制限** - 制限を有効化
+10. **歩きスマホ警告** - 設定を構成
+11. **その他** - 動画チケット購入時の承認を有効化
 
 ## 注意事項
 
-1. Chromeブラウザ（またはFirefox/Edge）のインストールが必要
-2. 初回実行時に対応するWebDriverが自動ダウンロードされます
-3. 画像認識にはテンプレート画像を `images/58/templates/` ディレクトリに配置する必要があります
+1. Chromeブラウザ（またはFirefox/Edge）のインストールが必要です
+2. 初回実行時に対応するWebDriverが自動的にダウンロードされます
+3. `headless: True` に設定すると、ブラウザが非表示で実行されます
+4. スクリーンショットは `images/screenshots/` ディレクトリに保存されます
 
 ## License
 
